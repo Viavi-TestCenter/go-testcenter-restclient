@@ -1,0 +1,15 @@
+# Compiled binaries
+*.exe
+
+
+# Go workspace (developer-local)
+go.work
+go.work.sum
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*~
