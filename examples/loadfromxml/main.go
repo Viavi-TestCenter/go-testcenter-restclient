@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	tc "github.com/Spirent-STC/go-testcenter-restclient"
+	tc "github.com/Viavi-TestCenter/go-testcenter-restclient"
 )
 
 func main() {

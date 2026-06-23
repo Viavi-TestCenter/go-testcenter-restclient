@@ -8,7 +8,7 @@ The package provides two clients:
 
 - **`AionClient`** — use this when connecting to a **LabServer hosted on the AION platform** (deployed as either **TC LabServer** or **TestCenter+**). It logs in to AION, discovers the target product instance, and transparently refreshes Bearer tokens for the lifetime of the session. Construct with `NewAionClient(AionOptions{...})`.
 
-**API documentation:** <https://pkg.go.dev/github.com/Spirent-STC/go-testcenter-restclient>
+**API documentation:** <https://pkg.go.dev/github.com/Viavi-TestCenter/go-testcenter-restclient>
 
 ## Topics
 
@@ -27,7 +27,7 @@ The package provides two clients:
 - Install the module:
 
   ```sh
-  go get github.com/Spirent-STC/go-testcenter-restclient
+  go get github.com/Viavi-TestCenter/go-testcenter-restclient
   ```
 
 - Write Go code to talk with a TestCenter REST API server:
@@ -40,7 +40,7 @@ The package provides two clients:
       "log"
       "time"
 
-      tc "github.com/Spirent-STC/go-testcenter-restclient"
+      tc "github.com/Viavi-TestCenter/go-testcenter-restclient"
   )
 
   func main() {
@@ -67,7 +67,7 @@ The package provides two clients:
 Install (or upgrade) the latest published version:
 
 ```sh
-go get -u github.com/Spirent-STC/go-testcenter-restclient@latest
+go get -u github.com/Viavi-TestCenter/go-testcenter-restclient@latest
 ```
 
 Requires Go 1.20+.
@@ -75,7 +75,7 @@ Requires Go 1.20+.
 To build from source, clone the repository and run `go build ./...` from the repo root. Every `examples/<name>` subdirectory is an independent `main` package:
 
 ```sh
-git clone https://github.com/Spirent-STC/go-testcenter-restclient.git
+git clone https://github.com/Viavi-TestCenter/go-testcenter-restclient.git
 cd go-testcenter-restclient
 go build ./...
 go run ./examples/createsession 10.0.0.5
@@ -109,7 +109,7 @@ import (
     "log"
     "time"
 
-    tc "github.com/Spirent-STC/go-testcenter-restclient"
+    tc "github.com/Viavi-TestCenter/go-testcenter-restclient"
 )
 
 func main() {
@@ -212,7 +212,7 @@ package main
 import (
     "log"
 
-    tc "github.com/Spirent-STC/go-testcenter-restclient"
+    tc "github.com/Viavi-TestCenter/go-testcenter-restclient"
 )
 
 func main() {
@@ -466,7 +466,7 @@ case err != nil:
 
 ## Support
 
-For bug reports, feature requests, or questions, contact **VIAVI Solutions** at <hse.support@viavisolutions.com>, or file an issue at <https://github.com/Spirent-STC/go-testcenter-restclient/issues>.
+For bug reports, feature requests, or questions, contact **VIAVI Solutions** at <hse.support@viavisolutions.com>, or file an issue at <https://github.com/Viavi-TestCenter/go-testcenter-restclient/issues>.
 
 ## License
 
