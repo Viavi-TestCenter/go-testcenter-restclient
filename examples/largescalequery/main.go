@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	tc "github.com/Spirent-STC/go-testcenter-restclient"
+	tc "github.com/Viavi-TestCenter/go-testcenter-restclient"
 )
 
 const (
