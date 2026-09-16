@@ -211,6 +211,10 @@ type stcapiEndpoint struct {
 	proto string
 	host  string
 	port  int
+	// viaManaged is true when the endpoint routes through the product's
+	// managed session layer (the "testcenterplus" port) rather than the
+	// raw stcapi port.
+	viaManaged bool
 }
 
 func (a *aionAuth) getStcapiEndpoint(nodeName string, uiPort int) (stcapiEndpoint, error) {
@@ -253,6 +257,7 @@ func (a *aionAuth) getStcapiEndpoint(nodeName string, uiPort int) (stcapiEndpoin
 		}
 		uiMatch := uiPort == 0
 		stcapiURL := ""
+		tcPlusURL := ""
 		ports, _ := inst["ports"].([]interface{})
 		for _, p := range ports {
 			pm, _ := p.(map[string]interface{})
@@ -271,27 +276,36 @@ func (a *aionAuth) getStcapiEndpoint(nodeName string, uiPort int) (stcapiEndpoin
 					}
 				}
 			}
-			if strings.ToLower(name) == "stcapi" {
+			switch strings.ToLower(name) {
+			case "stcapi":
 				stcapiURL = urlStr
+			case "testcenterplus":
+				tcPlusURL = urlStr
 			}
 		}
-		if !uiMatch || stcapiURL == "" {
+		// TC+ routes /stcapi/sessions through its nginx (testcenterplus port).
+		// Prefer TC+'s URL so session management in TC+ is not bypassed.
+		resolvedURL := tcPlusURL
+		if resolvedURL == "" {
+			resolvedURL = stcapiURL
+		}
+		if !uiMatch || resolvedURL == "" {
 			continue
 		}
-		parsed, err := url.Parse(stcapiURL)
+		parsed, err := url.Parse(resolvedURL)
 		if err != nil {
-			return stcapiEndpoint{}, &AionError{Message: "stcapi port entry has invalid url: " + stcapiURL}
+			return stcapiEndpoint{}, &AionError{Message: "stcapi port entry has invalid url: " + resolvedURL}
 		}
 		portStr := parsed.Port()
 		if parsed.Scheme == "" || parsed.Hostname() == "" || portStr == "" {
-			return stcapiEndpoint{}, &AionError{Message: "stcapi port entry has invalid url: " + stcapiURL}
+			return stcapiEndpoint{}, &AionError{Message: "stcapi port entry has invalid url: " + resolvedURL}
 		}
 		var port int
 		fmt.Sscanf(portStr, "%d", &port)
 		if a.debug {
 			fmt.Fprintf(a.logWriter, "===> stcapi endpoint: %s://%s:%d\n", parsed.Scheme, parsed.Hostname(), port)
 		}
-		return stcapiEndpoint{proto: parsed.Scheme, host: parsed.Hostname(), port: port}, nil
+		return stcapiEndpoint{proto: parsed.Scheme, host: parsed.Hostname(), port: port, viaManaged: tcPlusURL != ""}, nil
 	}
 
 	switch {
