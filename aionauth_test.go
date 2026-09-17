@@ -195,6 +195,83 @@ func TestGetStcapiEndpointParsesInventory(t *testing.T) {
 	}
 }
 
+func TestGetStcapiEndpointPrefersTestCenterPlusPort(t *testing.T) {
+	a, _ := newAION(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/inv/product-instances" {
+			http.NotFound(w, r)
+			return
+		}
+		_ = json.NewEncoder(w).Encode([]map[string]interface{}{
+			{
+				"node": map[string]interface{}{"name": "node-A"},
+				"ports": []interface{}{
+					map[string]interface{}{
+						"name": "StcApi",
+						"http": map[string]interface{}{
+							"url":    "https://labserver.internal:9443",
+							"has_ui": false,
+						},
+					},
+					map[string]interface{}{
+						"name": "TestCenterPlus",
+						"http": map[string]interface{}{
+							"url":    "https://tcplus.internal:443",
+							"has_ui": false,
+						},
+					},
+				},
+			},
+		})
+	}))
+	a.accessToken = "at-test"
+
+	ep, err := a.getStcapiEndpoint("node-A", 0)
+	if err != nil {
+		t.Fatalf("getStcapiEndpoint: %v", err)
+	}
+	if ep.proto != "https" || ep.host != "tcplus.internal" || ep.port != 443 {
+		t.Fatalf("endpoint=%+v, want TC+ port preferred over stcapi", ep)
+	}
+	if !ep.viaManaged {
+		t.Fatalf("viaManaged=false, want true when testcenterplus port is present")
+	}
+}
+
+func TestGetStcapiEndpointFallsBackToStcapiWhenNoTestCenterPlusPort(t *testing.T) {
+	a, _ := newAION(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/inv/product-instances" {
+			http.NotFound(w, r)
+			return
+		}
+		_ = json.NewEncoder(w).Encode([]map[string]interface{}{
+			{
+				"node": map[string]interface{}{"name": "node-A"},
+				"ports": []interface{}{
+					map[string]interface{}{
+						"name": "StcApi",
+						"http": map[string]interface{}{
+							"url":    "https://labserver.internal:9443",
+							"has_ui": false,
+						},
+					},
+				},
+			},
+		})
+	}))
+	a.accessToken = "at-test"
+
+	ep, err := a.getStcapiEndpoint("node-A", 0)
+	if err != nil {
+		t.Fatalf("getStcapiEndpoint: %v", err)
+	}
+	if ep.proto != "https" || ep.host != "labserver.internal" || ep.port != 9443 {
+		t.Fatalf("endpoint=%+v", ep)
+	}
+	if ep.viaManaged {
+		t.Fatalf("viaManaged=true, want false for a bare labserver instance")
+	}
+}
+
 func TestAionErrorMessage(t *testing.T) {
 	e := &AionError{Message: "oops", HTTPStatus: 500}
 	if e.Error() != "oops" {
